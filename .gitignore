@@ -3,3 +3,5 @@ venv/
 data.zip
 questions.txt
 data.txt
+answer_key.csv
+quiz_questions.csv

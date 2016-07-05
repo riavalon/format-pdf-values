@@ -1,3 +1,4 @@
+import csv
 import re
 import os
 
@@ -40,12 +41,11 @@ def testing():
                 idx = questions_text.index('Question {}'.format(i))
                 questions.append(questions_text[idx:])
         # import pdb; pdb.set_trace()
-        return questions
 
     with open('data.txt', 'r') as f:
         for line in f.readlines():
             if 'persuade' in line.lower():
-                HEADERS = line.strip().split(' ')
+                HEADERS = line.strip().lower().split(' ')
 
             match = question_pattern.match(line)
             if match:
@@ -57,18 +57,44 @@ def testing():
     for k, v in enumerate(fdata):
         fdata[k] = v[1:-1]
 
-    # {
-    #     'question_text': 'some text',
-    #     'question_num': 2,
-    #     'answers': {
-    #         'a': 'Persuade',
-    #         'b': 'Collaborate'
-    #     }
-    # }
+    objects = []
+    for item in questions:
+        items = item.splitlines()
+        pattern = re.compile('\d+')
+        q = {
+            'question_num': pattern.search(items[0]).group(),
+            'a': items[1][3:],
+            'b': items[2][3:],
+        }
+        objects.append(q)
 
-    # questions = []
-    # for item in fdata:
 
+    if not os.path.exists('quiz_questions.csv'):
+        # create CSV
+        with open('quiz_questions.csv', 'w') as f:
+            writer = csv.DictWriter(f, fieldnames=objects[0].keys())
+            writer.writeheader()
+            writer.writerows(objects)
+
+    answer_key = []
+    for k, v in enumerate(fdata):
+        # import pdb; pdb.set_trace()
+        answer = {
+            'q_num': k + 1,
+            'a_value': HEADERS[v.index('A')],
+            'b_value': HEADERS[v.index('B')],
+        }
+        answer_key.append(answer)
+
+    if not os.path.exists('answer_key.csv'):
+        with open('answer_key.csv', 'w') as f:
+            import pdb; pdb.set_trace()
+            fieldnames = ['q_num', 'a_value', 'b_value']
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(answer_key)
+
+    return objects, answer_key
 
 
 def format_values(arr):
@@ -92,3 +118,5 @@ def remove_one_space(string):
         newstring = string[:start+1] + " " * (count-1) + string[end-1:]
         return newstring
     return string
+
+testing()
