@@ -1,0 +1,5 @@
+venv/
+*.pyc
+data.zip
+questions.txt
+data.txt
